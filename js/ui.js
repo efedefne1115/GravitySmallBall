@@ -350,7 +350,8 @@ const UI = (function () {
   }
 
   function layoutCanvas(canvas) {
-    const sw = window.innerWidth, sh = window.innerHeight;
+    const vp = Unity.viewport();
+    const sw = vp.w, sh = vp.h;
     const sf = sw / REF_W;                     // match = 0 -> match width
     const refH = sh / sf;
     canvas.scaleFactor = sf;

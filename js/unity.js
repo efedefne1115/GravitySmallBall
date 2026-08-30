@@ -141,6 +141,19 @@ const Unity = (function () {
     }
   }
 
+  // ---- Viewport ---------------------------------------------------------
+  // One single source of truth for "how big is the screen", used by both the
+  // world canvas and the uGUI CanvasScaler. `clientWidth/Height` is the layout
+  // viewport, which with `viewport-fit=cover` already spans the notch/cutout,
+  // and unlike innerWidth it never includes a scrollbar - so the two layers can
+  // never disagree by a pixel and leave a bright strip at an edge.
+  function viewport() {
+    const d = document.documentElement;
+    const w = (d && d.clientWidth) || window.innerWidth || 1;
+    const h = (d && d.clientHeight) || window.innerHeight || 1;
+    return { w: w, h: h };
+  }
+
   // ---- Camera -----------------------------------------------------------
   const Camera = {
     x: 0, y: 0,
@@ -164,6 +177,6 @@ const Unity = (function () {
   return {
     Mathf, moveTowards2, colorToCss, mulColor,
     sprites, spriteByName, initSprites, loadSprites,
-    Time, WaitForSeconds, CoroutineRunner, Camera,
+    Time, WaitForSeconds, CoroutineRunner, Camera, viewport,
   };
 })();

@@ -27,11 +27,16 @@
 
   function resize() {
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const w = Math.round(window.innerWidth * dpr);
-    const h = Math.round(window.innerHeight * dpr);
+    const vp = Unity.viewport();
+    const w = Math.max(1, Math.round(vp.w * dpr));
+    const h = Math.max(1, Math.round(vp.h * dpr));
     if (canvas.width !== w || canvas.height !== h) {
       canvas.width = w; canvas.height = h;
     }
+    // Pin the CSS box to the measured viewport too, so a fractional
+    // devicePixelRatio can never leave a sliver of page background showing.
+    canvas.style.width = vp.w + 'px';
+    canvas.style.height = vp.h + 'px';
     Unity.Camera.setViewport(w, h);
     UI.resize();
   }
