@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Game5</title>
+
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#fdf948">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Game5">
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+<link rel="icon" href="assets/icons/icon-192.png">
+
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="game-root">
+  <!-- Unity Main Camera render target (SpriteRenderers / world) -->
+  <canvas id="world"></canvas>
+
+  <!-- Unity Screen-Space-Overlay Canvases (built at runtime from the RectTransform data) -->
+  <div id="canvas-layer">
+    <div id="MainMenuCanvas" class="unity-canvas"></div>
+    <div id="GameCanvas" class="unity-canvas"></div>
+  </div>
+</div>
+
+<!-- shown only when the page is opened in a normal browser tab -->
+<div id="app-gate" class="hidden">
+  <div class="gate-inner">
+    <img id="gate-icon" src="assets/icons/icon-512.png" alt="Game5">
+    <h1>GAME5</h1>
+    <button id="install-btn">DOWNLOAD FOR APP</button>
+    <p id="install-hint">Oyunu oynamak icin once uygulamayi telefonuna kur.</p>
+    <div id="install-steps"></div>
+  </div>
+</div>
+
+<!-- shown inside the app when the phone is held upright -->
+<div id="rotate-gate">
+  <div class="rotate-inner">
+    <div class="phone"></div>
+    <p>Telefonu yan cevir</p>
+    <span>Rotate your device</span>
+  </div>
+</div>
+
+<div id="boot">Loading&hellip;</div>
+
+<!-- extracted Unity data (emitted as JS so the game also runs straight from file://) -->
+<script src="assets/data/sprites.data.js"></script>
+<script src="assets/data/config.data.js"></script>
+<script src="assets/data/world.data.js"></script>
+<script src="assets/data/ui.data.js"></script>
+
+<!-- engine -->
+<script src="js/unity.js"></script>
+<script src="js/save.js"></script>
+<script src="js/physics2d.js"></script>
+<script src="js/world.js"></script>
+<script src="js/player.js"></script>
+<script src="js/bird.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/managers.js"></script>
+<script src="script.js"></script>
+
+<!-- install gate / orientation - runs last, decides whether to start the game -->
+<script src="js/pwa.js"></script>
+<script>PWA.init();</script>
+</body>
+</html>

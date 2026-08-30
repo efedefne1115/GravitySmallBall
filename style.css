@@ -1,0 +1,273 @@
+/* ---------------------------------------------------------------------------
+   Game5 - web port
+   Layout notes:
+     * #world      -> the Unity "Main Camera" (orthographic, size 5). Canvas 2D.
+     * .unity-canvas -> a Unity Screen Space - Overlay Canvas.
+                        Its inner .canvas-space div is exactly
+                        (1920 x 1920*screenH/screenW) reference units big and is
+                        CSS-scaled by the CanvasScaler factor (screenW / 1920),
+                        which reproduces ScaleWithScreenSize / match = 0 (width).
+--------------------------------------------------------------------------- */
+
+@font-face {
+  font-family: "LiberationSans";
+  src: url("assets/fonts/LiberationSans.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #000;
+  /* Camera m_BackGroundColor = (0.192, 0.302, 0.475) */
+  -webkit-tap-highlight-color: transparent;
+  touch-action: none;
+  overscroll-behavior: none;
+}
+
+#game-root {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+#world {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+#canvas-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* one Unity Canvas (Screen Space - Overlay) */
+.unity-canvas {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.unity-canvas.inactive { display: none; }
+
+/* the reference-resolution space that gets scaled by the CanvasScaler factor */
+.canvas-space {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+  pointer-events: none;
+}
+
+/* every RectTransform becomes one of these */
+.rt {
+  position: absolute;
+  transform-origin: 0 0; /* overwritten per-element with the Unity pivot */
+}
+.rt.inactive { display: none; }
+
+/* UnityEngine.UI.Image */
+.rt > .img {
+  position: absolute;
+  inset: 0;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  pointer-events: none;
+}
+
+/* Raycast-target graphics receive the clicks (Unity GraphicRaycaster) */
+.rt.raycast { pointer-events: auto; }
+.rt.noraycast { pointer-events: none; }
+
+/* UnityEngine.UI.Button */
+.rt.btn { cursor: pointer; }
+.rt.btn.disabled { cursor: default; }
+
+/* TMPro.TextMeshProUGUI */
+.rt > .tmp {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  white-space: pre-wrap;
+  line-height: 1;
+  font-family: "LiberationSans", "Liberation Sans", Arial, Helvetica, sans-serif;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* UI.Mask -> Viewport */
+.rt.masked { overflow: hidden; }
+
+/* CanvasGroup emulation (loading screens) */
+.rt.canvasgroup { transition: none; }
+
+#boot {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+  color: #eee;
+  font: 16px/1.4 "LiberationSans", Arial, sans-serif;
+  z-index: 50;
+}
+#boot.done { display: none; }
+
+/* ---------------------------------------------------------------------------
+   Install gate - the only thing a plain browser tab shows
+--------------------------------------------------------------------------- */
+#app-gate {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  overflow-y: auto;
+  /* MainMenuCanvas/Panel colour (0.9924528, 0.97547644, 0.28275543) */
+  background: #fdf948;
+  font-family: "LiberationSans", "Liberation Sans", Arial, Helvetica, sans-serif;
+  -webkit-user-select: none;
+  user-select: none;
+}
+#app-gate.hidden { display: none; }
+
+.gate-inner {
+  width: 100%;
+  max-width: 420px;
+  text-align: center;
+  margin: auto;
+}
+
+#gate-icon {
+  width: 128px;
+  height: 128px;
+  max-width: 40vw;
+  max-height: 40vw;
+  display: block;
+  margin: 0 auto 14px;
+  image-rendering: pixelated;
+  border-radius: 22%;
+  box-shadow: 0 6px 0 rgba(0, 0, 0, .12);
+}
+
+#app-gate h1 {
+  font-size: clamp(30px, 9vw, 52px);
+  letter-spacing: .06em;
+  /* Play button label colour (0.15686275, 0.5882353, 0.21176472) */
+  color: #289636;
+  margin-bottom: 22px;
+}
+
+#install-btn {
+  display: block;
+  width: 100%;
+  padding: 20px 16px;
+  border: 0;
+  border-radius: 14px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: clamp(18px, 5.2vw, 26px);
+  font-weight: 700;
+  letter-spacing: .04em;
+  color: #123f19;
+  /* the Play button uses the grass sprite - reuse it here */
+  background: #3ea94f url("assets/sprites/Grasssssssss.png") center/100% 100% no-repeat;
+  box-shadow: 0 6px 0 #1f7a33;
+  transition: transform .06s ease, box-shadow .06s ease, filter .12s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+#install-btn:active {
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 #1f7a33;
+}
+#install-btn.ready { filter: saturate(1.15) brightness(1.05); }
+#install-btn:disabled { opacity: .6; cursor: default; }
+
+#install-hint {
+  margin-top: 14px;
+  font-size: 14px;
+  line-height: 1.45;
+  color: #6b6512;
+}
+
+#install-steps {
+  display: none;
+  margin-top: 18px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, .55);
+  color: #3b3806;
+  font-size: 14px;
+  line-height: 1.55;
+  text-align: left;
+}
+#install-steps.show { display: block; }
+#install-steps ol { margin: 8px 0 0 18px; }
+#install-steps li { margin-bottom: 6px; }
+
+/* ---------------------------------------------------------------------------
+   "Turn your phone" card - the game is meant to be played in landscape
+   (manifest orientation: landscape; this covers browsers that ignore it)
+--------------------------------------------------------------------------- */
+#rotate-gate {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: #101418;
+  color: #f2f6f2;
+  font-family: "LiberationSans", "Liberation Sans", Arial, Helvetica, sans-serif;
+  text-align: center;
+  -webkit-user-select: none;
+  user-select: none;
+}
+#rotate-gate.show { display: flex; }
+
+.rotate-inner p { font-size: 20px; font-weight: 700; margin-top: 22px; }
+.rotate-inner span { font-size: 13px; opacity: .55; }
+
+.rotate-inner .phone {
+  width: 74px;
+  height: 128px;
+  margin: 0 auto;
+  border: 4px solid #f2f6f2;
+  border-radius: 12px;
+  animation: g5-tilt 1.8s ease-in-out infinite;
+}
+@keyframes g5-tilt {
+  0%, 30%   { transform: rotate(0deg); }
+  55%, 100% { transform: rotate(-90deg); }
+}
+
+body.app-mode { background: #000; }
+
+#install-btn.loading { opacity: .75; cursor: progress; }
+#install-btn.done {
+  background: #cfcfcf;
+  box-shadow: 0 6px 0 #9a9a9a;
+  color: #444;
+  cursor: default;
+}
+#install-steps i {
+  display: block;
+  margin-top: 10px;
+  font-size: 12.5px;
+  opacity: .7;
+  font-style: normal;
+}
