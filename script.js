@@ -16,7 +16,9 @@
   let player = null;
   const birds = [];
   const extraSprites = [];
+  const fxSprites = [];
   let gm = null, menuManager = null, panelManager = null;
+  let bar = null, playPanel = null;
   let showColliders = false;
 
   // Camera m_ClearFlags 2 (Solid Color), m_BackGroundColor
@@ -65,6 +67,9 @@
         birds.push(new Bird(b, sp, col));
       }
 
+      // ---- 289 BackgroundSpinner --------------------------------------
+      Spinners.build();
+
       // ---- UI ----------------------------------------------------------
       UI.build();
 
@@ -79,6 +84,15 @@
       menuManager.start();
       gm.start();
 
+      // ---- BarManager + PlayPanelSystem --------------------------------
+      bar = new BarManager(window.G5_COMP.bar);
+      playPanel = new PlayPanelSystem(window.G5_COMP.playPanel);
+      // GameManager'in butonlara ekledigi dinleyicileri devralir
+      playPanel.hookLevelButtons();
+
+      // hata ayiklama / disaridan erisim
+      window.G5 = { player, birds, gm, menuManager, panelManager, bar, playPanel };
+
       Input.init(document.getElementById('game-root'));
       window.addEventListener('resize', resize);
       window.addEventListener('orientationchange', resize);
@@ -88,7 +102,7 @@
       resize();
 
       document.getElementById('boot').classList.add('done');
-      if (window.PWA && PWA.updateRotate) PWA.updateRotate();
+      if (window.Boot && Boot.updateRotate) Boot.updateRotate();
       requestAnimationFrame(loop);
     });
   }
@@ -140,18 +154,82 @@
     for (const b of birds) b.update(dt);
     gm.update(dt);
     UI.update(dt);
+    player.updateFX(dt);
+    Spinners.update(dt);
     Input.endFrame();
 
     // ---- LateUpdate ---------------------------------------------------
     gm.lateUpdate();
+    // DeathAnimation olum aninda kamerayi olum noktasinda tutar
+    // (Unity'de [DefaultExecutionOrder(200)] ile GameManager'dan sonra)
+    if (player.death.phase === 1) {
+      Unity.Camera.x = player.death.heldCamX;
+      Unity.Camera.y = player.death.heldCamY;
+    }
+    bar.lateUpdate();
+    playPanel.lateUpdate();
+    syncDeathCurtain();
 
-    // ---- render -------------------------------------------------------
+    render();
+  }
+
+  function render() {
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.fillStyle = BG;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    World.draw(ctx, Unity.Camera, extraSprites);
+
+    // oyuncu + kuslar + efektler + gorunur carklar tek listede
+    fxSprites.length = 0;
+    extraSprites[0].hidden = player.hidden;   // DeathAnimation oyuncuyu gizler
+    for (let i = 0; i < extraSprites.length; i++) fxSprites.push(extraSprites[i]);
+    let seq = player.collectFX(fxSprites);
+    Spinners.collect(fxSprites, Unity.Camera.bounds(), seq);
+
+    World.draw(ctx, Unity.Camera, fxSprites);
+
+    player.trail.draw(ctx, Unity.Camera);
+    drawPlayerLight();
+
     if (showColliders) World.drawColliders(ctx, Unity.Camera);
   }
+
+  // DeathAnimation, GameManager'in siyah ekranini devralir (Unity'de ayni
+  // CanvasGroup'u kendi zamanlamasiyla suruyor).
+  function syncDeathCurtain() {
+    const d = player.death;
+    if (!d.active) return;
+    const screen = gm.loadingGame;
+    if (!screen) return;
+    screen.setActive(true);
+    screen.el.parentNode.appendChild(screen.el);
+    screen.setAlpha(d.blackAlpha);
+  }
+
+  // Twoxwoob > Spot Light 2D (URP 2D point light, siddet 0.6, yaricap
+  // 2.7587 * 0.137718 dunya birimi) - yumusak ek aydinlatma
+  function drawPlayerLight() {
+    const L = window.G5_COMP.lights.playerLight;
+    if (!L || L.intensity <= 0) return;
+    const cam = Unity.Camera;
+    const r = L.outerRadius * L.scaledBy * cam.ppu;
+    if (r <= 0.5) return;
+    const sx = cam.worldToScreenX(player.renderX);
+    const sy = cam.worldToScreenY(player.renderY);
+
+    const g = ctx.createRadialGradient(sx, sy, 0, sx, sy, r);
+    const a = L.intensity;
+    g.addColorStop(0, 'rgba(255,255,255,' + a + ')');
+    g.addColorStop(L.falloff, 'rgba(255,255,255,' + a * 0.45 + ')');
+    g.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(sx, sy, r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
 
   /* FrameRateLimiter.cs sets Application.targetFrameRate = 300 with vSync off.
      The browser caps us at the display refresh through requestAnimationFrame;

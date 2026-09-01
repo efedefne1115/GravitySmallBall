@@ -8,40 +8,41 @@ layout or tuning value was invented.
 
 ---
 
-## 0. Telefonda oynamak (hizli baslangic)
+## 0. Nasil oynanir
 
-1. **`SUNUCU-BASLAT.bat`** dosyasina cift tikla. Pencerede su cikar:
+**Kurulum yok, indirme yok.** Siteyi ac, tek bir tus var:
 
-   ```
-   Bu bilgisayarda : http://localhost:8765/
-   TELEFONDA       : http://192.168.1.xx:8765/
-   ```
+> **OYUNU BASLAT**
 
-2. Telefonu **ayni Wi-Fi agina** bagla, `TELEFONDA` yazan adresi telefonun
-   tarayicisina yaz (Android: Chrome, iPhone: **Safari**).
-3. Acilan sayfada sadece tek bir tus var: **DOWNLOAD FOR APP**. Ona bas.
-   * Android/Chrome kurulum penceresini kendisi acar; cikmazsa ekranda
-     `⋮ → Uygulamayi yukle / Ana ekrana ekle` adimlari yazar.
-   * iPhone/Safari programatik kuruluma izin vermez, o yuzden ekranda
-     `Paylas → Ana Ekrana Ekle` adimlari yazar.
-4. Ana ekranda olusan **Game5** simgesinden ac. Artik tus yok, **oyun direkt
-   acilir**, tam ekran ve **yatay** calisir. Telefonu dik tutarsan
-   "Telefonu yan cevir" karti cikar ve oyun o sirada **durur** (arkadan olmezsin).
+Tusa basinca:
 
-Notlar:
+1. tarayici **tam ekrana** gecer (adres cubugu, sekmeler, sistem cubuklari kaybolur),
+2. mumkunse ekran **yatay moda** kilitlenir,
+3. oyun baslar.
 
-* Oyun telefona bu bilgisayardan geliyor, yani **PC ve sunucu penceresi acik
-  olmali**. Kapatirsan uygulama acilmaz.
-* Telefon baglanamazsa `SUNUCU-BASLAT.bat`'i bir kez **yonetici olarak** calistir —
-  Windows Guvenlik Duvari kuralini kendisi ekler.
-* PC olmadan da calismasi icin sayfanin **HTTPS** bir adreste durmasi gerekir;
-  o zaman `sw.js` her seyi cihaza cacheler ve uygulama tamamen cevrimdisi acilir.
-  Duz LAN `http://` adresi tarayici icin "guvenli baglam" sayilmadigi icin
-  service worker orada devre disi kalir (oyun yine de sorunsuz calisir).
-* Bilgisayarda test etmek icin: `http://localhost:8765/` → kurulum ekrani,
-  `http://localhost:8765/?app=1` → dogrudan oyun.
+Tam ekran ve yon kilidi tarayicilarda sadece bir kullanici hareketi icinde
+verilir - bu yuzden ikisi de o tusun icinde cagriliyor. Tam ekrandan cikarsan
+(ESC, sistem hareketi) sag altta kucuk bir tam ekran tusu belirir.
 
----
+Telefonu dik tutarsan "Telefonu yan cevir" karti cikar ve **oyun o sirada
+durur**, arkadan olmezsin.
+
+### Yayinlamak (GitHub Pages)
+
+`GITHUB-YUKLE.bat` -> cift tik -> Enter. Sonra acilan sayfada
+**Settings > Pages > Deploy from a branch > main > /(root) > Save**.
+1-2 dakika sonra:
+
+```
+https://efedefne1115.github.io/GravitySmallBall/
+```
+
+HTTPS oldugu icin `sw.js` devreye girer ve oyunu cihaza cacheler - ilk
+acilistan sonra internet olmasa da calisir.
+
+### Yerelde test
+
+`SUNUCU-BASLAT.bat` -> `http://localhost:8765/`
 
 ## 1. Source project
 
@@ -173,6 +174,9 @@ globals (rather than `.json` + `fetch`) purely so the game also runs from a
 * `world.data.js` — every SpriteRenderer and every Collider2D of every map,
   already in world space
 * `ui.data.js` — both Canvases as a RectTransform tree with Image / TMP_Text /
+* `components.data.js` — Unity Inspector'daki efekt ayarlari (trail, halka,
+  olum, toz, bar, panel, 2D isiklar) - birebir
+* `spinners.data.js` — 289 BackgroundSpinner ornegi, dunya konumu + ayarlari
   Button / ScrollRect / Mask components
 
 ---
@@ -189,6 +193,13 @@ Each C# file has a 1:1 JS counterpart:
 | `PanelManager.cs` | `js/managers.js` (`PanelManager`) |
 | `LevelFinishZone.cs` | folded into the collider tagging + `PlayerController.onEnter` |
 | `Bird.cs` | `js/bird.js` |
+| `PlayerTrail.cs` | `js/fx.js` (`Trail`) |
+| `PlayerEffects.cs` | `js/fx.js` (`Ring`) |
+| `DeathAnimation.cs` | `js/fx.js` (`DeathAnim`) |
+| `PlaceEffect.cs` | `js/fx.js` (`PlaceDust`) |
+| `BackgroundSpinner.cs` | `js/fx.js` (`Spinners`, 289 ornek) |
+| `BarManager.cs` | `js/hud.js` (`BarManager`) |
+| `PlayPanelSystem.cs` | `js/hud.js` (`PlayPanelSystem`) |
 | `FrameRateLimiter.cs` | n/a — see §7 |
 
 **Player** (`Twoxwoob`, layer 7): `moveSpeed 4` (overwritten per level),
@@ -360,7 +371,9 @@ Game5ForWeb/
 │  ├─ bird.js              Bird.cs
 │  ├─ ui.js                Canvas / RectTransform / Image / TMP / Button / ScrollRect / Mask
 │  ├─ managers.js          GameManager.cs, MenuManager.cs, PanelManager.cs, Input
-│  └─ pwa.js               kurulum ekrani, app-mode tespiti, yatay mod
+│  ├─ fx.js               PlayerTrail / PlayerEffects / DeathAnimation / PlaceEffect / BackgroundSpinner
+│  ├─ hud.js              BarManager, PlayPanelSystem
+│  └─ start.js            acilis ekrani, tam ekran, yatay mod, service worker
 └─ assets/
    ├─ sprites/             14 PNGs cropped from the Unity textures
    ├─ icons/               PWA ikonlari (Twoxwoob sprite'indan uretildi)
@@ -382,3 +395,35 @@ uzerinde Chrome her zaman gercek bir WebAPK kurmaz:
   gravity.
 * **PAUSE** button — pause menu (`Continue` / `Back To Menu`).
 * **C** — collider debug overlay (added for verification; not in the Unity build).
+
+---
+
+## 10. Bu surumde birebir olmayan yeni seyler
+
+Sahne 2026-09-01'de yeniden cikarildi; asagidakiler o gunku Unity halinin
+karsiligidir.
+
+**URP 2D isiklari.** Sahnede iki `Light2D` var:
+* `Global Light 2D` — type Global, beyaz, **siddet 0.8**. Bu, dunyadaki butun
+  sprite'lari 0.8 ile carpar. Web'de bu carpim dogrudan sprite tint'ine
+  katildi (`js/world.js`, `GLOBAL_LIGHT`) — sonuc ayni, maliyeti sifir.
+  Tek fark: kameranin arka plan rengi Unity'de isiktan etkilenmez, burada da
+  etkilenmiyor, o yuzden ikisi ayni.
+* `Twoxwoob > Spot Light 2D` — Point, siddet 0.6, dis yaricap 2.7587
+  (oyuncunun 0.137718 olcegiyle carpilinca ~0.38 dunya birimi), falloff 0.448.
+  Web'de oyuncunun uzerine additive bir radyal gradient olarak ciziliyor
+  (`drawPlayerLight`). Gorsel olarak cok yakin ama URP'nin falloff egrisi
+  birebir degil.
+
+**TrailRenderer.** Unity kendi serit mesh'ini uretir. Web'de ayni nokta
+gecmisi tutuluyor ve `canvas` cizgisi olarak ciziliyor; genislik ve 3 duraklı
+renk gradyani birebir, ama kose birlesimleri (`numCornerVertices 4`) yuvarlak
+uc/birlesim ile taklit ediliyor.
+
+**PlaceEffect'in zemin rengi.** Unity'de dokular `isReadable: 0` oldugu icin
+renk `RenderTexture` uzerinden okunuyordu; web'de doku zaten okunabilir, ayni
+histogram (5 bit kova, kazanan kovanin ortalamasi) dogrudan uygulaniyor.
+Sonuc ayni, yol farkli.
+
+**Level 10** artik bitirilebiliyor — Unity'de `FinishObject` eklenmis, web de
+onu aldi.

@@ -167,6 +167,34 @@ const UI = (function () {
       this.refreshTint();
     }
 
+    // --- Image.Type = Filled / Horizontal / Left (BarManager kullaniyor) ---
+    setFilled(v) {
+      if (!this.imgEl) return;
+      const k = Unity.Mathf.clamp01(v);
+      this.imgEl.style.clipPath = 'inset(0 ' + ((1 - k) * 100) + '% 0 0)';
+      this.imgEl.style.webkitClipPath = this.imgEl.style.clipPath;
+    }
+
+    // Panelin KENDI rengini degistirir (PlayPanelSystem her bolum icin)
+    setGraphicColor(color) {
+      if (!this.imgData) return;
+      this.imgData.color = color.slice();
+      this.applyImage(this.imgData.color);
+    }
+
+    // Rozet sprite'ini degistirir
+    setSprite(guid) {
+      if (!this.imgData) return;
+      if (this.imgData.sprite === guid) return;
+      this.imgData.sprite = guid;
+      if (this.imgCanvas) { this.imgCanvas.remove(); this.imgCanvas = null; }
+      this.applyImage(this.imgData.color);
+    }
+
+    setImageVisible(on) {
+      if (this.imgEl) this.imgEl.style.display = on ? '' : 'none';
+    }
+
     buildText(t) {
       const g = document.createElement('div');
       g.className = 'tmp';

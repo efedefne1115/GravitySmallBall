@@ -109,10 +109,21 @@ const World = (function () {
   // -----------------------------------------------------------------------
   // Colour tinting: Unity multiplies the sprite texture by SpriteRenderer.color
   // -----------------------------------------------------------------------
+  // Global Light 2D (type Global, beyaz, siddet 0.8) butun sprite'lari carpar.
+  // Unity'de bu isik gecisi; burada dogrudan tint'e katilir - sonuc ayni,
+  // maliyeti sifir.
+  const GLOBAL_LIGHT = (window.G5_COMP && window.G5_COMP.lights)
+    ? window.G5_COMP.lights.globalIntensity : 1;
+
   function tinted(sp) {
     const c = sp.color;
-    if (c[0] === 1 && c[1] === 1 && c[2] === 1) return sp.desc.img;
-    const key = sp.guidIdx + '|' + sp.colorIdx;
+    const L = GLOBAL_LIGHT;
+    const r = c[0] * L, g0 = c[1] * L, b = c[2] * L;
+    if (r === 1 && g0 === 1 && b === 1) return sp.desc.img;
+
+    const key = sp.tintKey !== undefined
+      ? sp.tintKey
+      : (sp.guidIdx + '|' + sp.colorIdx);
     let cv = tintCache.get(key);
     if (cv) return cv;
     const img = sp.desc.img;
@@ -122,12 +133,31 @@ const World = (function () {
     const g = cv.getContext('2d');
     g.drawImage(img, 0, 0);
     g.globalCompositeOperation = 'multiply';
-    g.fillStyle = 'rgb(' + Math.round(c[0] * 255) + ',' + Math.round(c[1] * 255) + ',' + Math.round(c[2] * 255) + ')';
+    g.fillStyle = 'rgb(' + Math.round(r * 255) + ',' + Math.round(g0 * 255) + ',' + Math.round(b * 255) + ')';
     g.fillRect(0, 0, cv.width, cv.height);
     g.globalCompositeOperation = 'destination-in';
     g.drawImage(img, 0, 0);
     tintCache.set(key, cv);
     return cv;
+  }
+
+  // Verilen noktayi iceren, en ustte cizilen GORUNUR sprite (PlaceEffect icin)
+  function spriteAt(x, y, minAlpha) {
+    let best = null, bestOrder = -Infinity;
+    for (const m of maps) {
+      if (x < m.minX || x > m.maxX || y < m.minY || y > m.maxY) continue;
+      const arr = m.buckets.get(Math.floor(x / BUCKET));
+      if (!arr) continue;
+      for (let i = 0; i < arr.length; i++) {
+        const sp = arr[i];
+        if (!sp.active || sp.hidden || sp.dynamic) continue;
+        if (sp.color[3] < minAlpha) continue;
+        if (x < sp.x - sp.hx || x > sp.x + sp.hx) continue;
+        if (y < sp.y - sp.hy || y > sp.y + sp.hy) continue;
+        if (sp.order > bestOrder) { bestOrder = sp.order; best = sp; }
+      }
+    }
+    return best;
   }
 
   // -----------------------------------------------------------------------
@@ -236,7 +266,7 @@ const World = (function () {
   }
 
   return {
-    build, draw, drawColliders, queryColliders,
+    build, draw, drawColliders, queryColliders, spriteAt,
     maps, spritesByGo, collidersByGo,
     get allColliders() { return allColliders; },
   };

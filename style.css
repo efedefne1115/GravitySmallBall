@@ -143,100 +143,6 @@ html, body {
 #boot.done { display: none; }
 
 /* ---------------------------------------------------------------------------
-   Install gate - the only thing a plain browser tab shows
---------------------------------------------------------------------------- */
-#app-gate {
-  position: fixed;
-  inset: 0;
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-  overflow-y: auto;
-  /* MainMenuCanvas/Panel colour (0.9924528, 0.97547644, 0.28275543) */
-  background: #fdf948;
-  font-family: "LiberationSans", "Liberation Sans", Arial, Helvetica, sans-serif;
-  -webkit-user-select: none;
-  user-select: none;
-}
-#app-gate.hidden { display: none; }
-
-.gate-inner {
-  width: 100%;
-  max-width: 420px;
-  text-align: center;
-  margin: auto;
-}
-
-#gate-icon {
-  width: 128px;
-  height: 128px;
-  max-width: 40vw;
-  max-height: 40vw;
-  display: block;
-  margin: 0 auto 14px;
-  image-rendering: pixelated;
-  border-radius: 22%;
-  box-shadow: 0 6px 0 rgba(0, 0, 0, .12);
-}
-
-#app-gate h1 {
-  font-size: clamp(30px, 9vw, 52px);
-  letter-spacing: .06em;
-  /* Play button label colour (0.15686275, 0.5882353, 0.21176472) */
-  color: #289636;
-  margin-bottom: 22px;
-}
-
-#install-btn {
-  display: block;
-  width: 100%;
-  padding: 20px 16px;
-  border: 0;
-  border-radius: 14px;
-  cursor: pointer;
-  font-family: inherit;
-  font-size: clamp(18px, 5.2vw, 26px);
-  font-weight: 700;
-  letter-spacing: .04em;
-  color: #123f19;
-  /* the Play button uses the grass sprite - reuse it here */
-  background: #3ea94f url("assets/sprites/Grasssssssss.png") center/100% 100% no-repeat;
-  box-shadow: 0 6px 0 #1f7a33;
-  transition: transform .06s ease, box-shadow .06s ease, filter .12s ease;
-  -webkit-tap-highlight-color: transparent;
-}
-#install-btn:active {
-  transform: translateY(4px);
-  box-shadow: 0 2px 0 #1f7a33;
-}
-#install-btn.ready { filter: saturate(1.15) brightness(1.05); }
-#install-btn:disabled { opacity: .6; cursor: default; }
-
-#install-hint {
-  margin-top: 14px;
-  font-size: 14px;
-  line-height: 1.45;
-  color: #6b6512;
-}
-
-#install-steps {
-  display: none;
-  margin-top: 18px;
-  padding: 14px 16px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, .55);
-  color: #3b3806;
-  font-size: 14px;
-  line-height: 1.55;
-  text-align: left;
-}
-#install-steps.show { display: block; }
-#install-steps ol { margin: 8px 0 0 18px; }
-#install-steps li { margin-bottom: 6px; }
-
-/* ---------------------------------------------------------------------------
    "Turn your phone" card - the game is meant to be played in landscape
    (manifest orientation: landscape; this covers browsers that ignore it)
 --------------------------------------------------------------------------- */
@@ -272,19 +178,79 @@ html, body {
   55%, 100% { transform: rotate(-90deg); }
 }
 
-body.app-mode { background: #000; }
 
-#install-btn.loading { opacity: .75; cursor: progress; }
-#install-btn.done {
-  background: #cfcfcf;
-  box-shadow: 0 6px 0 #9a9a9a;
-  color: #444;
-  cursor: default;
+/* ---------------------------------------------------------------------------
+   Acilis ekrani - tek tus: oyunu baslatir ve tam ekrana alir
+--------------------------------------------------------------------------- */
+#start-gate {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: #fdf948;  /* MainMenuCanvas/Panel rengi */
+  font-family: "LiberationSans", "Liberation Sans", Arial, Helvetica, sans-serif;
+  -webkit-user-select: none;
+  user-select: none;
 }
-#install-steps i {
+
+.gate-inner { width: 100%; max-width: 420px; text-align: center; margin: auto; }
+
+#gate-icon {
+  width: 128px; height: 128px;
+  max-width: 34vmin; max-height: 34vmin;
+  display: block; margin: 0 auto 14px;
+  image-rendering: pixelated;
+  border-radius: 22%;
+  box-shadow: 0 6px 0 rgba(0, 0, 0, .12);
+}
+
+#start-gate h1 {
+  font-size: clamp(30px, 8vmin, 52px);
+  letter-spacing: .06em;
+  color: #289636;          /* Play butonu yazi rengi */
+  margin-bottom: 22px;
+}
+
+#start-btn {
   display: block;
-  margin-top: 10px;
-  font-size: 12.5px;
-  opacity: .7;
-  font-style: normal;
+  width: 100%;
+  padding: 20px 16px;
+  border: 0;
+  border-radius: 14px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: clamp(18px, 4.6vmin, 26px);
+  font-weight: 700;
+  letter-spacing: .04em;
+  color: #123f19;
+  background: #3ea94f url("assets/sprites/Grasssssssss.png") center/100% 100% no-repeat;
+  box-shadow: 0 6px 0 #1f7a33;
+  transition: transform .06s ease, box-shadow .06s ease;
+  -webkit-tap-highlight-color: transparent;
 }
+#start-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #1f7a33; }
+
+#start-hint { margin-top: 14px; font-size: 13px; color: #6b6512; }
+
+/* tam ekrandan cikilirsa geri donme tusu */
+#fs-btn {
+  position: fixed;
+  right: 10px;
+  bottom: 10px;
+  z-index: 80;
+  display: none;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, .45);
+  color: #fff;
+  font-size: 19px;
+  line-height: 1;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+#fs-btn.show { display: block; }

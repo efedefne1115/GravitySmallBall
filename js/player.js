@@ -47,6 +47,16 @@ class PlayerController {
 
     this.touching = new Set();   // collider ids we are already overlapping
     this._near = [];
+
+    // --- efekt sistemleri (Unity'de ayni GameObject uzerindeki script'ler) ---
+    const C = window.G5_COMP;
+    this.trail = new Trail(C.trail);
+    this.ring = new Ring(C.ring);
+    this.death = new DeathAnim(C.death);
+    this.dust = new PlaceDust(C.place);
+    this.contactCount = 0;
+    this.prevVelY = 0;
+    this.hidden = false;
   }
 
   get CurrentState() { return this.state; }
@@ -58,6 +68,7 @@ class PlayerController {
         if (Input.getMouseButtonDown(0) && !Input.isPointerOverUI()) {
           this.state = PlayerState.Playing;
           this.applyGravity();
+          this.ring.spawn(this.renderX, this.renderY);   // PlayerEffects
         }
         break;
 
@@ -65,6 +76,8 @@ class PlayerController {
         if (Input.getMouseButtonDown(0) && !Input.isPointerOverUI()) {
           this.isGravityDown = !this.isGravityDown;
           this.applyGravity();
+          this.ring.spawn(this.renderX, this.renderY);   // PlayerEffects
+          Spinners.flip();                                // BackgroundSpinner tepkisi
         }
         this.updateStuckCheck(dt);
         break;
@@ -108,6 +121,8 @@ class PlayerController {
     // PlayerController.FixedUpdate
     this.vx = this.moveSpeed;
 
+    this.prevVelY = this.vy;   // PlaceEffect carpisma oncesi hizi okur
+
     // Unity's integrator: v += gravity * gravityScale * dt ; p += v * dt
     this.vy += Physics2D.GRAVITY_Y * this.gravityScale * dt;
 
@@ -138,6 +153,7 @@ class PlayerController {
     const stillTouching = new Set();
 
     // 1) solid response (only non-trigger, non-spike colliders exist as solids)
+    let landNx = 0, landNy = 0, landCol = null, solidCount = 0;
     for (let it = 0; it < 4; it++) {
       let moved = false;
       for (let i = 0; i < near.length; i++) {
@@ -145,6 +161,7 @@ class PlayerController {
         if (!c.active || !c.solid || c.type !== 0) continue;
         const mtv = Physics2D.satBox(this.x, this.y, this.hw, this.hh, c);
         if (!mtv) continue;
+        if (it === 0) { solidCount++; if (!landCol) { landCol = c; landNx = mtv.nx; landNy = mtv.ny; } }
         this.x += mtv.nx * mtv.depth;
         this.y += mtv.ny * mtv.depth;
         // kill the velocity component pushing into the surface
@@ -155,6 +172,9 @@ class PlayerController {
       if (!moved) break;
     }
 
+    // PlaceEffect: havadan zemine inis (temas 0 -> 1 gecisi)
+    this.checkLanding(solidCount, landCol, landNx, landNy);
+
     // 2) contacts / triggers
     for (let i = 0; i < near.length; i++) {
       const c = near[i];
@@ -164,6 +184,34 @@ class PlayerController {
       if (!this.touching.has(c)) this.onEnter(c);
     }
     this.touching = stillTouching;
+  }
+
+  // PlaceEffect.OnCollisionEnter2D karsiligi
+  checkLanding(solidCount, col, nx, ny) {
+    const before = this.contactCount;
+    this.contactCount = solidCount;
+    if (before !== 0 || solidCount === 0 || !col) return;
+
+    const c = window.G5_COMP.place;
+    const gravityDown = this.gravityScale >= 0;
+    if (!gravityDown && !c.tersYercekimindeDeCalissin) return;
+
+    const approach = gravityDown ? -this.prevVelY : this.prevVelY;
+    if (approach < c.minInisHizi) return;
+
+    const align = gravityDown ? ny : -ny;
+    if (align < c.normalEsigi) return;
+
+    // Temas noktasi: oyuncunun ayagi
+    const px = this.x, py = this.y - ny * this.hh * -1;
+    const cx = this.x, cy = this.y + (gravityDown ? -this.hh : this.hh);
+
+    // Once collider'in kendi sprite'i, yoksa o noktada GORUNEN sprite
+    let ground = World.spritesByGo.get(col.go);
+    if (!ground || !ground.desc || ground.color[3] < c.enAzPikselAlfasi) {
+      ground = World.spriteAt(cx, cy, c.enAzPikselAlfasi);
+    }
+    this.dust.burst(cx, cy, nx, ny, gravityDown, ground, Unity.Time.time);
   }
 
   onEnter(c) {
@@ -181,14 +229,42 @@ class PlayerController {
 
   die() {
     if (this.state !== PlayerState.Playing) return;
+
+    // DeathAnimation: olum konumunu ve kamerayi olmeden ONCE yakala
+    this.death.begin(this.renderX, this.renderY, Unity.Camera.x, Unity.Camera.y);
+    if (window.G5_COMP.death.oyuncuyuGizle) this.hidden = true;
+
     this.freezeImmediately();
     if (GameManager.Instance) GameManager.Instance.onPlayerDied();
+  }
+
+  // Efektlerin kare basi guncellemesi
+  updateFX(dt) {
+    const playing = this.state === PlayerState.Playing;
+    const emit = playing && (!window.G5_COMP.trail.onlyWhilePlaying || playing);
+    this.trail.update(dt, this.renderX, this.renderY, emit);
+    this.ring.update(dt, this.renderX, this.renderY);
+    this.death.update(dt);
+    this.dust.update(dt);
+
+    // DeathAnimation bitince oyuncu tekrar gorunur olur
+    if (!this.death.active && this.hidden) this.hidden = false;
+  }
+
+  collectFX(out) {
+    let seq = 100000;
+    seq = this.ring.collect(out, seq);
+    seq = this.dust.collect(out, seq);
+    seq = this.death.collect(out, seq);
+    return seq;
   }
 
   // ---- API used by GameManager / MenuManager -----------------------------
   setMoveSpeed(s) { this.moveSpeed = s; }
 
   resetForNewAttempt(px, py) {
+    if (this.trail) this.trail.clear();          // PlayerTrail isinlanma korumasi
+    this.contactCount = 0;
     this.state = PlayerState.Idle;
     this.x = px; this.y = py;
     this.prevX = px; this.prevY = py;
@@ -215,6 +291,8 @@ class PlayerController {
   }
 
   freezeAtLobby(px, py) {
+    if (this.trail) this.trail.clear();
+    this.contactCount = 0;
     this.state = PlayerState.Idle;
     this.x = px; this.y = py;
     this.prevX = px; this.prevY = py;

@@ -1,22 +1,26 @@
-/* Sprite table extracted from the Unity .png.meta TextureImporter blocks.
-   Every sprite in this project uses spriteMode 2 with a single sub-sprite;
-   `w`/`h` are that sub-sprite's rect (already cropped out of the source PNG),
-   `ppu` is spritePixelsToUnits and `px`/`py` is the resolved pivot
-   (alignment 0 = Center = 0.5,0.5 - only the built-in Triangle uses a
-   custom pivot, alignment 9). */
+/* Unity .png.meta TextureImporter bloklarindan cikarildi */
 window.G5_SPRITES = {
-  "f8005eaf57cf1184c8d7e9281b7d3162": {"file":"Daire.png",            "w":1024,"h":1024,"ppu":100,"px":0.5,"py":0.5,        "name":"Daire"},
-  "e103f5efdc4721048955a2d83c10c942": {"file":"Dirt.png",             "w":1024,"h":1024,"ppu":100,"px":0.5,"py":0.5,        "name":"Dirt"},
-  "c5ef2145579ff524ca6fb39bfa535ad3": {"file":"Ending.png",           "w":210, "h":850, "ppu":100,"px":0.5,"py":0.5,        "name":"Ending"},
-  "6ec80858b7070154cbddd0ddab25664b": {"file":"EnemyBird.png",        "w":874, "h":422, "ppu":100,"px":0.5,"py":0.5,        "name":"EnemyBird"},
-  "f6c24e605a628924db2a51e200b753ab": {"file":"EnemyFlyBird.png",     "w":864, "h":760, "ppu":100,"px":0.5,"py":0.5,        "name":"EnemyFlyBird"},
-  "e5fd12e3c440e1749b7cfceaad227651": {"file":"Grasssssssss.png",     "w":1024,"h":497, "ppu":100,"px":0.5,"py":0.5,        "name":"Grasssssssss"},
-  "279870c5b15157841af770f79aae6065": {"file":"Kaktus.png",           "w":354, "h":801, "ppu":100,"px":0.5,"py":0.5,        "name":"Kaktus"},
-  "0d1e8bca32807974aac4dff6967c6b4f": {"file":"RBirdStay.png",        "w":950, "h":471, "ppu":100,"px":0.5,"py":0.5,        "name":"RBirdStay"},
-  "553afe035704e814f80d509bf32c7b3e": {"file":"RBridFly.png",         "w":864, "h":760, "ppu":100,"px":0.5,"py":0.5,        "name":"RBridFly"},
-  "a3123b1d9e6c1f7429c12a11fb41a865": {"file":"Sky.png",              "w":1024,"h":1024,"ppu":100,"px":0.5,"py":0.5,        "name":"Sky"},
-  "2162144aaf029bb479ee079920763e02": {"file":"Treeeeeeeeeeeeee.png", "w":402, "h":561, "ppu":100,"px":0.5,"py":0.5,        "name":"Treeeeeeeeeeeeee"},
-  "7cd04a2aee067454583c28670800d221": {"file":"Twoxwoob.png",         "w":706, "h":610, "ppu":100,"px":0.5,"py":0.5,        "name":"Twoxwoob"},
-  "311925a002f4447b3a28927169b83ea6": {"file":"Square.png",           "w":256, "h":256, "ppu":256,"px":0.5,"py":0.5,        "name":"Square"},
-  "75f5f34dc1b5347e0b8351032682f224": {"file":"Triangle.png",         "w":256, "h":256, "ppu":256,"px":0.5,"py":0.28866667,"name":"Triangle"}
+  "f8005eaf57cf1184c8d7e9281b7d3162": {"file":"Daire.png","w":1024,"h":1024,"ppu":100,"px":0.5,"py":0.5,"name":"Daire"},
+  "e103f5efdc4721048955a2d83c10c942": {"file":"Dirt.png","w":1024,"h":1024,"ppu":100,"px":0.5,"py":0.5,"name":"Dirt"},
+  "c5ef2145579ff524ca6fb39bfa535ad3": {"file":"Ending.png","w":210,"h":850,"ppu":100,"px":0.5,"py":0.5,"name":"Ending"},
+  "6ec80858b7070154cbddd0ddab25664b": {"file":"EnemyBird.png","w":874,"h":422,"ppu":100,"px":0.5,"py":0.5,"name":"EnemyBird"},
+  "f6c24e605a628924db2a51e200b753ab": {"file":"EnemyFlyBird.png","w":864,"h":760,"ppu":100,"px":0.5,"py":0.5,"name":"EnemyFlyBird"},
+  "e5fd12e3c440e1749b7cfceaad227651": {"file":"Grasssssssss.png","w":1024,"h":497,"ppu":100,"px":0.5,"py":0.5,"name":"Grasssssssss"},
+  "279870c5b15157841af770f79aae6065": {"file":"Kaktus.png","w":354,"h":801,"ppu":100,"px":0.5,"py":0.5,"name":"Kaktus"},
+  "0d1e8bca32807974aac4dff6967c6b4f": {"file":"RBirdStay.png","w":950,"h":471,"ppu":100,"px":0.5,"py":0.5,"name":"RBirdStay"},
+  "553afe035704e814f80d509bf32c7b3e": {"file":"RBridFly.png","w":864,"h":760,"ppu":100,"px":0.5,"py":0.5,"name":"RBridFly"},
+  "a3123b1d9e6c1f7429c12a11fb41a865": {"file":"Sky.png","w":1024,"h":1024,"ppu":100,"px":0.5,"py":0.5,"name":"Sky"},
+  "2162144aaf029bb479ee079920763e02": {"file":"Treeeeeeeeeeeeee.png","w":402,"h":561,"ppu":100,"px":0.5,"py":0.5,"name":"Treeeeeeeeeeeeee"},
+  "7cd04a2aee067454583c28670800d221": {"file":"Twoxwoob.png","w":706,"h":610,"ppu":100,"px":0.5,"py":0.5,"name":"Twoxwoob"},
+  "fc894a9f0c866ac4e98e104f22eebf04": {"file":"Barrrrr.png","w":974,"h":118,"ppu":100,"px":0.5,"py":0.5,"name":"Barrrrr"},
+  "563d984ad31890b4f8d046b073170613": {"file":"Miktarrrrr.png","w":966,"h":110,"ppu":100,"px":0.5,"py":0.5,"name":"Miktarrrrr"},
+  "b884dc2fe2fde3d4093387d9a298e44f": {"file":"Effectttk.png","w":1024,"h":1024,"ppu":100,"px":0.5,"py":0.5,"name":"Effectttk"},
+  "70ecb339d3197f6428eb47685be35d44": {"file":"Finished0times.png","w":1024,"h":1024,"ppu":100,"px":0.5,"py":0.5,"name":"Finished0times"},
+  "81ed26df0cb1d194889330ccb252387e": {"file":"Finished1times.png","w":1024,"h":1024,"ppu":100,"px":0.5,"py":0.5,"name":"Finished1times"},
+  "248113e33b1ef7a488decd13b8499a91": {"file":"Finished2times.png","w":1024,"h":1024,"ppu":100,"px":0.5,"py":0.5,"name":"Finished2times"},
+  "4f89e490062d9ab468a19c525fec828e": {"file":"Finished5times.png","w":1024,"h":1024,"ppu":100,"px":0.5,"py":0.5,"name":"Finished5times"},
+  "22c09485f76045f46a9de0f1feab818e": {"file":"Finished10times.png","w":1024,"h":1024,"ppu":100,"px":0.5,"py":0.5,"name":"Finished10times"},
+  "75a5980ab99cbae4798b611cce368a82": {"file":"PrimalMode.png","w":1024,"h":1024,"ppu":100,"px":0.5,"py":0.5,"name":"PrimalMode"},
+  "311925a002f4447b3a28927169b83ea6": {"file":"Square.png","w":256,"h":256,"ppu":256,"px":0.5,"py":0.5,"name":"Square"},
+  "75f5f34dc1b5347e0b8351032682f224": {"file":"Triangle.png","w":256,"h":256,"ppu":256,"px":0.5,"py":0.28866667,"name":"Triangle"}
 };

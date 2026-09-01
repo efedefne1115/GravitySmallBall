@@ -35,6 +35,22 @@ const PlayerPrefs = (function () {
       try { if (ok) window.localStorage.removeItem(PREFIX + key); } catch (e) {}
       delete memory[key];
     },
+    GetFloat(key, def) {
+      const v = this.GetString(key, null);
+      if (v === null || v === '') return def === undefined ? 0 : def;
+      const n = parseFloat(v);
+      return isNaN(n) ? (def === undefined ? 0 : def) : n;
+    },
+    SetFloat(key, value) { this.SetString(key, String(value)); },
+
+    GetInt(key, def) {
+      const v = this.GetString(key, null);
+      if (v === null || v === '') return def === undefined ? 0 : def;
+      const n = parseInt(v, 10);
+      return isNaN(n) ? (def === undefined ? 0 : def) : n;
+    },
+    SetInt(key, value) { this.SetString(key, String(Math.round(value))); },
+
     Save() { /* localStorage writes are already synchronous */ },
   };
 })();
